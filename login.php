@@ -1,32 +1,60 @@
 <?php
-require_once "includes/security.php";
+
+require_once __DIR__ . '/includes/security.php';
+require_once __DIR__ . '/config/app_url.php';
 
 cropsense_start_secure_session();
-cropsense_apply_security_headers("web");
+cropsense_apply_security_headers('web');
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>CropSense | Login</title>
 
-    <meta name="theme-color" content="#123d2f">
+    <meta
+        name="theme-color"
+        content="#123d2f"
+    >
 
-    <!-- Favicon -->
-    <link rel="icon" href="/assets/img/cropsense-logo.svg" type="image/svg+xml">
+    <link
+        rel="icon"
+        href="<?= htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8') ?>"
+        type="image/svg+xml"
+    >
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
 
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+        rel="stylesheet"
+    >
 
-    <!-- Login CSS -->
-    <link rel="stylesheet" href="/assets/css/login.css?v=20260716-command2">
-    <link rel="stylesheet" href="/assets/css/design-system.css?v=20260817-ui-refresh">
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(cropsense_asset('css/login.css'), ENT_QUOTES, 'UTF-8') ?>?v=20260901"
+    >
+
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(cropsense_asset('css/design-system.css'), ENT_QUOTES, 'UTF-8') ?>?v=20260901"
+    >
+
+    <link
+        rel="stylesheet"
+        href="<?= htmlspecialchars(cropsense_asset('css/login-recaptcha-fix.css'), ENT_QUOTES, 'UTF-8') ?>?v=20261027"
+    >
 </head>
 
 <body>
@@ -46,7 +74,7 @@ cropsense_apply_security_headers("web");
         <section class="brand-area" aria-label="CropSense introduction">
             <div class="brand-lockup">
                 <div class="brand-logo" aria-hidden="true">
-                    <img src="/assets/img/cropsense-logo.svg" alt="">
+                    <img src="<?= htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
                 </div>
 
                 <div>
@@ -100,7 +128,7 @@ cropsense_apply_security_headers("web");
 
             <div class="login-card">
                 <div class="card-icon">
-                    <img src="/assets/img/cropsense-logo.svg" alt="">
+                    <img src="<?= htmlspecialchars(cropsense_asset('img/cropsense-logo.svg'), ENT_QUOTES, 'UTF-8') ?>" alt="">
                 </div>
 
                 <div class="card-heading">
@@ -111,14 +139,12 @@ cropsense_apply_security_headers("web");
 
                 <?php if (isset($_SESSION['error'])): ?>
                     <div class="alert alert-danger">
-                        <?php
-                            echo $_SESSION['error'];
-                            unset($_SESSION['error']);
-                        ?>
+                        <?= htmlspecialchars((string) $_SESSION['error'], ENT_QUOTES, 'UTF-8') ?>
                     </div>
+                    <?php unset($_SESSION['error']); ?>
                 <?php endif; ?>
 
-                <form method="POST" action="includes/auth.php" id="loginForm">
+                <form method="POST" action="<?= htmlspecialchars(cropsense_url('includes/auth.php'), ENT_QUOTES, 'UTF-8') ?>" id="loginForm">
                     <div class="form-field">
                         <label class="form-label" for="username" data-i18n="username">Username or Email</label>
 
@@ -184,7 +210,23 @@ cropsense_apply_security_headers("web");
                         <a href="#" data-i18n="forgot">Forgot Password?</a>
                     </div>
 
-                    <button type="submit" class="btn sign-in-btn">
+                    <?php if (CROPSENSE_RECAPTCHA_SITE_KEY !== ''): ?>
+                        <div class="recaptcha-wrapper" aria-label="reCAPTCHA verification">
+                            <div
+                                class="g-recaptcha"
+                                data-sitekey="<?= htmlspecialchars(CROPSENSE_RECAPTCHA_SITE_KEY, ENT_QUOTES, 'UTF-8') ?>">
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <div class="alert alert-danger recaptcha-config-error">
+                            reCAPTCHA is not configured. Add the site key to config/security.local.php.
+                        </div>
+                    <?php endif; ?>
+
+                    <button
+                        type="submit"
+                        class="btn sign-in-btn"
+                        <?= CROPSENSE_RECAPTCHA_SITE_KEY === '' ? 'disabled' : '' ?>>
                         <i class="bi bi-box-arrow-in-right"></i>
                         <span data-i18n="signIn">Sign In</span>
                     </button>
@@ -197,6 +239,7 @@ cropsense_apply_security_headers("web");
             </div>
         </section>
     </section>
+
     <p class="copyright-line" data-i18n="copyright">&copy; 2026 CropSense. All rights reserved.</p>
 
     <footer class="trust-bar" aria-label="Trust signals">
@@ -208,9 +251,16 @@ cropsense_apply_security_headers("web");
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/assets/js/script.js?v=20260716-command2"></script>
+
+<?php if (CROPSENSE_RECAPTCHA_SITE_KEY !== ''): ?>
+<script
+    src="https://www.google.com/recaptcha/api.js"
+    async
+    defer>
+</script>
+<?php endif; ?>
+
+<script src="<?= htmlspecialchars(cropsense_asset('js/script.js'), ENT_QUOTES, 'UTF-8') ?>?v=20260716-command2"></script>
 </body>
 
 </html>
-
-
